@@ -9,12 +9,16 @@ app.use(express.json());
 app.post("/form", async (req, res) => {
 	try {
 		const { courseA, courseB, courseC } = req.body;
-		const { rows } = await pool.query(
-			"INSERT INTO form (course_a, course_b, course_c) VALUES($1, $2, $3) RETURNING *",
-			[courseA, courseB, courseC]
-		);
-		console.log("👋 rows ------>", rows);
-		res.json(rows[0]);
+		const isValid = [courseA?.toLowerCase(), courseB?.toLowerCase(), courseC?.toLowerCase()].includes("calculus");
+		if (!isValid) {
+			res.status(400).json("User must register for calculus course");
+		} else {
+			const { rows } = await pool.query(
+				"INSERT INTO form (course_a, course_b, course_c) VALUES($1, $2, $3) RETURNING *",
+				[courseA, courseB, courseC]
+			);
+			res.json(rows[0]);
+		}
 	} catch (err) {
 		console.error(err);
 		res.send(err);
